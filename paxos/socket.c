@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
       return 1;
     }
 
+
   memset(&serv_addr, '0', sizeof(serv_addr));
 
   serv_addr.sin_family = AF_INET;
