@@ -16,57 +16,43 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <time.h>
 
+int main(int argc, char *argv[])
+{
+  int listenfd = 0, connfd = 0;
+  struct sockaddr_in serv_addr;
 
-int
-main (int argc, char** argv){
-    
-    int sockfd;
-    int connfd;
-    char buff [1024];
+  char sendBuff[1025];
+  time_t ticks;
 
-    struct sockaddr_in serv_addr;
+  listenfd = socket(AF_INET, SOCK_STREAM, 0);
+  memset(&serv_addr, '0', sizeof(serv_addr));
+  memset(sendBuff, '0', sizeof(sendBuff));
 
-    // create socket
-    if (sockfd = socket (AF_INET, SOCK_STREAM, 0) < 0){
-	printf ("\n Error creating socket\n");
-	exit (1);
+  serv_addr.sin_family = AF_INET;
+  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  serv_addr.sin_port = htons(5000);
+
+  if (bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0){
+    perror ("Can't bind!\n");
+    exit (1);
+  }
+
+  if (listen(listenfd, 10) < 0){
+    perror ("Can't listen!\n");
+    exit (1);
+  }
+
+  while(1)
+    {
+      connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
+
+      ticks = time(NULL);
+      snprintf(sendBuff, sizeof(sendBuff), "%.24s\r\n", ctime(&ticks));
+      write(connfd, sendBuff, strlen(sendBuff));
+
+      close(connfd);
+      sleep(1);
     }
-
-    memset (&serv_addr, '0', sizeof (serv_addr));
-
-    // setting addresses and port
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl (INADDR_ANY);
-    serv_addr.sin_port = htons (8001);
-
-/*    if (inet_pton (AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0){
-	printf ("\n Error creating IP\n");
-	exit (1);
-	}*/
-
-    // bind and listen
-    if (bind (sockfd, (struct sockaddr *)&serv_addr, sizeof (serv_addr)) < 0){
-	printf ("Can't bind\n");
-	close (sockfd);
-	exit (1);
-    }
-
-    if (listen (sockfd, 10) < 0){
-	printf ("\nDeaf. Can't listen\n");
-	exit (1);
-    }
-    
-    printf ("listening\n");
-
-    // read from socket
-    connfd = accept (sockfd, NULL, NULL);
-
-    snprintf (buff, sizeof (buff), "Hello world!\n");
-
-    write (connfd, buff, strlen (buff));
-
-    close (connfd);
-    close (sockfd);
-    return 0;
 }
