@@ -12,8 +12,15 @@ s.bind ((host, port))
 
 s.listen (5)
 
+s.settimeout (4)
+
 while True:
-    c, addr = s.accept()
+    try:
+        c, addr = s.accept()
+
+    except:
+        print 'timeout'
+        break;
 
     c.sendall ('Fuck you Paxos!'.encode ('utf-8'))
     c.close ()

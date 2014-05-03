@@ -3,16 +3,15 @@
 *.ko
 *.obj
 *.elf
+*.pyc
 
 # Libraries
 *.lib
 *.a
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+# Editor Autosave
+*~
+\#*#
 
 # Executables
 *.exe
