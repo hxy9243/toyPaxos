@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-import socket
-
+from gevent import socket
 
 s = socket.socket ()
 
@@ -14,13 +13,25 @@ s.listen (5)
 
 s.settimeout (4)
 
+
+
 while True:
-    try:
-        c, addr = s.accept()
+    while True:
+        try:
+            c, addr = s.accept()
+            break
+        except:
+            print 'timeout'
+            pass
 
-    except:
-        print 'timeout'
-        break;
 
-    c.sendall ('Fuck you Paxos!'.encode ('utf-8'))
-    c.close ()
+    while True:
+        try:
+            c.sendall('fuck you')
+            
+        except:
+            print 'timeout sending'
+            break
+
+
+c.close ()
