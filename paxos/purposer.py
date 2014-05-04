@@ -1,20 +1,21 @@
 #!/usr/bin/python
 
-import gevent
 from gevent import socket
+import time
+import json
 
 class Purposer ():
-    ''' A class of paxos purposers '''
+    ''' Purposer class for paxos purposers '''
     
     def __init__ (self, config):
         ''' init purposer '''
         # set state
-        self.is_purpose = 0
-        self.is_timedout = 0
+        
+        self.is_timedout = 0 # how many times timedout
         
         # set variable
         self.ID = config.ID
-        self.value = config.ID
+        self.value = ''
         self.purpose_num = config.ID
         self.quorum = config.quorum
         self.acceptors_fd = {}
@@ -33,8 +34,13 @@ class Purposer ():
             s.close ()
 
 
+    def set_val (self, msg):
+        ''' set the value of the purpose '''
+        self.value = msg
+
+
     def establish (self):
-        ''' establish connections with acceptors'''
+        ''' Establish connections with acceptors '''
         # establish connection, connect to all acceptors
         try:
             for i in self.quorum:
@@ -66,11 +72,14 @@ class Purposer ():
 
     def recv_quorum (self):
         ''' Recv from the quorum '''
+        msg = []
         try:
             for i in self.quorum:
                 s = self.acceptors_fd[i]
-                msg = s.recv (2048)
-                parse_msg (msg)
+                msg.append ( s.recv (2048))
+
+            # parse all the recieved msg
+            parse_msg (msg)
 
         # raise timeout Exception
         except socket.timeout:
@@ -78,6 +87,13 @@ class Purposer ():
         except:
             print 'Unknown error while recving'
             exit ()
+
+
+    def parse_msg (self, msg):
+        ''' Parse incoming messages from acceptor
+            param: list of all msg '''
+        
+        pass
 
 
     def prepare (self):
@@ -105,6 +121,10 @@ class Purposer ():
 
 
     def purpose_except (self):
+        ''' An exception inside the purposer, try to handle it'''
+        # resend the purpose
+
+
         pass
 
 
