@@ -5,7 +5,7 @@ from gevent import socket
 s = socket.socket ()
 
 host = socket.gethostname ()
-port = 8080
+port = 8002
 
 s.bind ((host, port))
 
@@ -20,16 +20,15 @@ while True:
         try:
             c, addr = s.accept()
             break
-        except:
+        except socket.timeout:
             print 'timeout'
             pass
 
-
-    while True:
         try:
+            c.settimeout (4)
             c.sendall('fuck you')
             
-        except:
+        except socket.timeout:
             print 'timeout sending'
             break
 

@@ -18,7 +18,7 @@ class Purposer ():
         self.value = ''
         self.purpose_num = config.ID
         self.quorum = config.quorum
-        self.acceptors_fd = {}
+        self.acceptors_fd = {} # mapping ID to socket fd
 
         # create socket
         for i in self.quorum:
@@ -44,12 +44,12 @@ class Purposer ():
         # establish connection, connect to all acceptors
         try:
             for i in self.quorum:
-                address = self.quorum[i]['address']
+                host = self.quorum[i]['host']
                 port = self.quorum[i]['port']
                 s = self.acceptors_fd[i]
 
                 s.settimeout (5)
-                s.connect ((address, port))
+                s.connect ((host, port))
                 
         except:
             print ("Problem connecting to addresses")
@@ -72,14 +72,14 @@ class Purposer ():
 
     def recv_quorum (self):
         ''' Recv from the quorum '''
-        msg = []
+        msg_list = []
         try:
             for i in self.quorum:
                 s = self.acceptors_fd[i]
-                msg.append ( s.recv (2048))
+                msg_list.append ( s.recv (2048))
 
             # parse all the recieved msg
-            parse_msg (msg)
+            parse_msg (msg_list)
 
         # raise timeout Exception
         except socket.timeout:
@@ -89,7 +89,7 @@ class Purposer ():
             exit ()
 
 
-    def parse_msg (self, msg):
+    def parse_msg (self, msg_list):
         ''' Parse incoming messages from acceptor
             param: list of all msg '''
         
