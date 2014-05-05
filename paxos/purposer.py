@@ -11,7 +11,7 @@ class Purposer ():
         ''' init purposer '''
         # set state
         
-        self.is_timedout = 0 # how many times timedout
+        self.is_timedout = 3 # how many times receive timedout
         
         # set variable
         self.ID = config.ID
@@ -34,9 +34,9 @@ class Purposer ():
             s.close ()
 
 
-    def set_val (self, msg):
+    def set_val (self, val):
         ''' set the value of the purpose '''
-        self.value = msg
+        self.value = val
 
 
     def establish (self):
@@ -92,40 +92,74 @@ class Purposer ():
     def parse_msg (self, msg_list):
         ''' Parse incoming messages from acceptor
             param: list of all msg '''
-        
-        pass
+        # TODO: parse msg 
+        for m in msg_list:
+            if (m['type'] == 'promise'):
+                self.send_accept ()
+                continue
+            
+            elif (m['type'] == 'NACK'):
+                # NACK means problem
+                pass
+
+    
+    def updateNum (self):
+        self.purpose_num = self.purpose_num + 32
 
 
-    def prepare (self):
+    def gen_msg (self, msg_type, value = ''):
+        ''' return the prepare message to send to acceptors '''
+        Msg = {}
+        Msg['ID'] = self.ID
+        Msg['msg_type'] = msg_type
+        Msg['value'] = value
+        return json.dumps (Msg)
+
+
+    def send_prepare (self):
         ''' purpose a value'''
-        # prepare the prepare msg
-        prepare_msg = ''
+        # TODO: prepare the prepare msg
+        prepare_msg = self.gen_msg ('prepare')
 
-        # send accept signals to all acceptors
+        # send prepare signals to all acceptors
         try:
             self.send_quorum (prepare_msg)
-        except:
+        except socket.timeout:
             # handle prepare failure
             self.prepare_except ()
+        except:
+            print 'Unkown exception in prepare signal. Exiting..'
+            exit ()
 
 
-    def accept (self):
+    def send_accept (self):
         ''' send the accept value to all acceptors '''
-        accept_msg = ''
+        accept_msg = self.gen_msg ('accept', self.value)
 
         try:
             self.send_quorum (accept_msg)
         except:
             # TODO: handle accept excepts
             pass
-
+        
+        # update the purpose number
+        self.updateNum ()
+        
 
     def purpose_except (self):
         ''' An exception inside the purposer, try to handle it'''
         # resend the purpose
+        self.is_timedout = self.is_timedout + 1
+        if (self.is_timedout > 3):
+            print ('Purposer with ID: %d failed with purpose num %d'
+                   % (self.ID, self.purpose_num))
 
+        self.updateNum ()
+
+        self.prepare_msg ()
 
         pass
 
 
+    
 

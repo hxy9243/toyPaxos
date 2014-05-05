@@ -15,6 +15,7 @@ class Acceptor ():
         # set variable
         self.ID = config.ID
         self.purpose_num = 0
+        self.promise_ID = 0
         self.quorum = config.quorum
         self.purposer_fd = {} # mapping ID to socket fd
 
@@ -34,7 +35,7 @@ class Acceptor ():
 
     def log (self):
         ''' commit to log'''
-
+        # TODO: commit to log
 
 
     def establish (self):
@@ -69,32 +70,40 @@ class Acceptor ():
                 parse_msg (msg)
             except socket.timeout:
                 print 'Timeout reached recieving.'
-                pass
+            except:
+                print 'Unknown error when accepting connections'
+                exit ()
     
 
     def parse_msg (self, msg):
         ''' parse the msg from purposer '''
         # if a prepare
-        
-
-        # if a promise
-
-
-    def accept (self, purposer_fd):
-        ''' accept the purpose from purposer'''
         try:
-            purposer_fd.recv (2048)
+            msg = json.loads (msg)
         except:
-            print 'Error accepting from purposer'
-        finally:
-            purposer_fd.close ()
+            print 'Unknown msg'
+            pass
+
+        if (msg['type'] == 'prepare'):
+            if (msg['propose_num'] > self.prepare_num):
+                # prepare number 
+                self.prepare_num = msg['propose_num']
+                # TODO: promise
+            else:
+                # pass
+                pass
+
+        elif (msg['type'] == 'accept'):
+            if (msg['propose_num'] == self.promise_ID):
+                # if an accept msg, commit val to log
+                self.log (val)
 
 
     def promise (self, purposer_fd):
         ''' promise the purposer 
         param: the purposer connection socket '''
         # prepare the promise msg
-
+        msg = promise_msg ()
 
         # send the promise to purposer
         try:
@@ -102,5 +111,4 @@ class Acceptor ():
         except:
             print 'Error sending promise msg'
             pass
-
         
