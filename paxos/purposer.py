@@ -93,14 +93,11 @@ class Purposer ():
         ''' Parse incoming messages from acceptor
             param: list of all msg '''
         # TODO: parse msg 
-        for m in msg_list:
-            if (m['type'] == 'promise'):
-                self.send_accept ()
-                continue
-            
-            elif (m['type'] == 'NACK'):
-                # NACK means problem
-                pass
+        if (m['type'] == 'promise' for all m in msg_list):
+            return 'promise'
+
+        else:
+            return 'NACK'
 
     
     def updateNum (self):
@@ -126,7 +123,7 @@ class Purposer ():
             self.send_quorum (prepare_msg)
         except socket.timeout:
             # handle prepare failure
-            self.prepare_except ()
+            raise socket.timeout
         except:
             print 'Unkown exception in prepare signal. Exiting..'
             exit ()
@@ -140,26 +137,48 @@ class Purposer ():
             self.send_quorum (accept_msg)
         except:
             # TODO: handle accept excepts
-            pass
+            return 'Error'
         
         # update the purpose number
         self.updateNum ()
+        return 'Success'
         
 
     def purpose_except (self):
         ''' An exception inside the purposer, try to handle it'''
         # resend the purpose
-        self.is_timedout = self.is_timedout + 1
-        if (self.is_timedout > 3):
+        self.retry_count = self.retry_count - 1
+        if (self.retry_count == 0):
             print ('Purposer with ID: %d failed with purpose num %d'
                    % (self.ID, self.purpose_num))
 
         self.updateNum ()
 
-        self.prepare_msg ()
 
-        pass
+    def purpose (self, value):
+        ''' purpose a value to all acceptors'''
+        self.value = value
 
+        # send prepare to all acceptors
+        while (self.retry_count != 0):
+            try:
+                self.send_prepare ()
+                break
+            except socket.timeout:
+                self.purpose_except ()
+            except:
+                print 'Unknown error while preparing'
+                exit ()
 
-    
-
+        # send accept msg to all acceptors
+        while (self.retry_count != 0):
+            try:
+                self.send_accept ()
+                break
+            except socket.timeout:
+                self.purpose_except ()
+            except:
+                print 'Unknown error while preparing'
+                exit ()
+                
+        print 'purpose successful'
