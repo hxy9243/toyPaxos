@@ -19,6 +19,7 @@ class Acceptor ():
         self.quorum = config['quorum']
         self.proposer_fd = {} # mapping ID to socket fd
         self.value = ''
+        self.lock = 'unlock'
 
 
     def __del__ (self):
@@ -68,16 +69,16 @@ class Acceptor ():
     def parse_msg (self, msg):
         ''' parse the msg from proposer '''
         print ('parsing msg')
+        print msg
         try:
             msg = json.loads (msg)
         except:
             print 'Unknown msg'
-            return 'unknown msg'
+            return ('unknown msg', msg)
 
         print ('accepting msg type %s' % msg['msg_type'])
         print ('accepting propose number %d' % msg['propose_num'])
         print ('self propose number %d' % self.propose_num)
-
 
         if (msg['msg_type'] == 'prepare'):
             # if propose number higher
@@ -85,14 +86,14 @@ class Acceptor ():
                 # prepare number 
                 self.propose_num = msg['propose_num']
                 self.promise_ID = msg['ID']
-                return 'promise'
+                return ('promise', msg)
             else:
-                return 'NACK'
+                return ('NACK', msg)
 
         elif (msg['msg_type'] == 'accept'):
             if (msg['ID'] == self.promise_ID):
                 self.promise_ID = -1
-                return 'accept'
+                return ('accept', msg)
 
 
     def send (self, proposer_fd, msg_type):
@@ -117,7 +118,9 @@ class Acceptor ():
             # keep accepting new requests
             try:
                 c, addr = self.listener.accept ()
-                print ('accepting from address %s' % (addr [0]))
+                print c
+                print addr
+                print ('[log] accepting from address %s' % (addr[0]))
             except Exception as p:
                 print 'Error while accepting. Exiting..'
                 print p
@@ -127,17 +130,19 @@ class Acceptor ():
             try:
 #                c.settimeout (4)
                 msg = c.recv (2048)
-                msg_type = self.parse_msg (msg)
+                msg_type, msg = self.parse_msg (msg)
 
                 if (msg_type == 'promise'):
+                    # promise a propose
                     self.send (c, 'promise')
-                    print ('promised')
+                    
+                    print ('[log] promised proposer ID %d' % msg['ID'])
 
                     msg = c.recv (2048)
-                    msg_type = self.parse_msg (msg)
+                    msg_type, msg = self.parse_msg (msg)
 
                     if (msg_type == 'accept'):
-                        msg = json.loads (msg)
+
                         self.value = msg['value']
                         print ('logging')
                         self.log ()
@@ -151,7 +156,7 @@ class Acceptor ():
                     continue
 
             except socket.timeout:
-                print 'Timeout reached recieving.'
+                print 'Timeout reached receiving.'
                 continue
             
             except Exception as p:

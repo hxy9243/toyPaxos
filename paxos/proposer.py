@@ -11,7 +11,7 @@ class Proposer ():
         ''' init proposer '''
         # set state
         
-        self.retry_count = 3
+        self.retry_count = 10
         
         # set variable
         self.ID = config['ID']
@@ -52,7 +52,7 @@ class Proposer ():
                 port = self.quorum[i]['port']
                 s = self.acceptors_fd[i]
 
-                s.settimeout (5)
+                s.settimeout (30)
                 s.connect ((host, port))
                 print 'Connection to acceptors established.'
                 
@@ -90,9 +90,10 @@ class Proposer ():
 
         # raise timeout Exception
         except socket.timeout:
+            print '[err] recveiving quorum timed out'
             raise socket.timeout
         except:
-            print 'Unknown error while recving'
+            print '[err] Unknown error while receiving'
             exit ()
 
 
@@ -189,6 +190,12 @@ class Proposer ():
             return 'retry'
 
 
+    def retry (self):
+        self.close_all ()
+        self.establish ()
+        self.propose (self.value)
+
+
     def propose (self, value):
         ''' propose a value to all acceptors'''
         # TODO: handle cases where value is too large (>2048)
@@ -204,18 +211,14 @@ class Proposer ():
                     break
                 else:
                     if (self.propose_except () == 'retry'):
+                        self.retry ()
                         self.close_all ()
-                        self.establish ()
-                        self.propose (self.value)
-                        return
+
+                    return
 
             except socket.timeout:
-                if (self.propose_except () == 'retry'):
-                    self.close_all ()
-                    self.establish ()
-                    self.propose (self.value)
-                else:
-                    return 'fail'
+                print ('propose from ID %d timed out' % self.ID)
+                return 'fail'
             except Exception as e:
                 print e
                 print ('Unknown error while preparing')
@@ -232,6 +235,6 @@ class Proposer ():
         # propose successful, clean up
         print 'propose successful'
         self.updateNum ()
-        self.retry_count = 3
+        self.retry_count = 10
         self.close_all ()
         return 'success'
