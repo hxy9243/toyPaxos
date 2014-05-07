@@ -4,30 +4,29 @@ from gevent import socket
 import time
 import json
 
-class Purposer ():
-    ''' Purposer class for paxos purposers '''
+class Proposer ():
+    ''' Proposer class for paxos proposers '''
     
     def __init__ (self, config):
-        ''' init purposer '''
+        ''' init proposer '''
         # set state
         
         self.retry_count = 3
         
         # set variable
-        self.ID = config.ID
+        self.ID = config['ID']
         self.value = ''
-        self.purpose_num = config.ID
-        self.quorum = config.quorum
+        self.propose_num = config['ID']
+        self.quorum = config['quorum']
         self.acceptors_fd = {} # mapping ID to socket fd
-
-        # create socket
-        for i in self.quorum:
-            s = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
-            self.acceptors_fd[i] = s
 
 
     def __del__ (self):
         ''' destructor for class '''
+        self.close_all ()
+
+
+    def close_all (self):
         # delete all acceptors
         for i in self.acceptors_fd:
             s = self.acceptors_fd[i]
@@ -35,12 +34,17 @@ class Purposer ():
 
 
     def set_val (self, val):
-        ''' set the value of the purpose '''
+        ''' set the value of the propose '''
         self.value = val
 
 
     def establish (self):
         ''' Establish connections with acceptors '''
+        # create socket
+        for i in self.quorum:
+            s = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+            self.acceptors_fd[i] = s
+
         # establish connection, connect to all acceptors
         try:
             for i in self.quorum:
@@ -52,7 +56,8 @@ class Purposer ():
                 s.connect ((host, port))
                 print 'Connection to acceptors established.'
                 
-        except:
+        except Exception as e:
+            print e
             print ("Problem connecting to addresses")
             exit ()
 
@@ -66,7 +71,8 @@ class Purposer ():
         # raise timeout Exception
         except socket.timeout:
             raise socket.timeout
-        except:
+        except Exception as e:
+            print (e)
             print 'Unknown error while sending'
             exit ()
 
@@ -90,6 +96,29 @@ class Purposer ():
             exit ()
 
 
+    def updateNum (self):
+
+        # to guarantee no collision between proposers,
+        # TODO: a more sophiscated way?
+        self.propose_num = self.propose_num + 32
+
+
+    def gen_msg (self, msg_type, value = ''):
+        ''' return the prepare message to send to acceptors '''
+        # Msg type:
+        # 'prepare': inform acceptors to prepare for a propose
+        # 'accept': inform acceptors to accept for a propose
+
+        Msg = {}
+        Msg['ID'] = self.ID
+        Msg['msg_type'] = msg_type
+        Msg['propose_num'] = self.propose_num
+        Msg['value'] = value
+        m = json.dumps (Msg)
+        print m
+        return m
+
+
     def parse_msg (self, m_list):
         ''' Parse incoming messages from acceptor after prepare
             param: list of all msg '''
@@ -97,52 +126,38 @@ class Purposer ():
 
         msg_list = []
 
+        print m_list
+
         try:
-            for m in msg_list:
+            for m in m_list:
                 msg_list.append (json.loads (m))
-        except:
+
+        except Exception as p:
             print 'Error parsing received msg'
+            print p
             return 'NACK'
         
-        if (m['msg_type'] == 'promise' for all m in msg_list):
+
+        if ( all (m['msg_type'] == 'promise' for m in msg_list) ):
             return 'promise'
 
         else:
             return 'NACK'
 
     
-    def updateNum (self):
-
-        # to guarantee no collision between purposers,
-        # TODO: a more sophiscated way?
-        self.purpose_num = self.purpose_num + 32
-
-
-    def gen_msg (self, msg_type, value = ''):
-        ''' return the prepare message to send to acceptors '''
-        # Msg type:
-        # 'prepare': inform acceptors to prepare for a purpose
-        # 'accept': inform acceptors to accept for a purpose
-
-        Msg = {}
-        Msg['ID'] = self.ID
-        Msg['msg_type'] = msg_type
-        Msg['propuse_num'] = self.propuse_num
-        Msg['value'] = value
-        return json.dumps (Msg)
-
-
     def send_prepare (self):
-        ''' purpose for a purpose number'''
+        ''' prepare for a propose number'''
 
         # send prepare signals to all acceptors
         try:
+            print ('sending prepare')
             self.send_quorum (self.gen_msg ('prepare'))
         except socket.timeout:
             # handle prepare failure
             raise socket.timeout
-        except:
+        except Exception as e:
             print 'Unkown exception in preparing. Exiting..'
+            print (e)
             exit ()
 
 
@@ -150,7 +165,7 @@ class Purposer ():
         ''' send the accept value to all acceptors '''
 
         try:
-            self.send_quorum (self.gen_msg ('accept', self.value))
+            self.send_quorum (self.gen_msg (msg_type='accept', value= self.value))
         except socket.timeout:
             raise socket.timeout
         except:
@@ -158,26 +173,26 @@ class Purposer ():
             exit ()
         
 
-    def purpose_except (self):
-        ''' An exception inside the purposer, try to handle it'''
-        self.updateNum ()
+    def propose_except (self):
+        ''' An exception inside the proposer, try to handle it'''
 
         # update retry
         self.retry_count = self.retry_count - 1
-        if (self.retry_count == 0):
-            print ('Purposer with ID: %d failed with purpose num %d'
-                   % (self.ID, self.purpose_num))
+        print self.retry_count
+        if (self.retry_count <= 0):
+            print ('Proposer with ID: %d failed with propose num %d'
+                   % (self.ID, self.propose_num))
             return 'fail'
 
         else:
+            self.updateNum ()
             return 'retry'
 
 
-    def purpose (self, value):
-        ''' purpose a value to all acceptors'''
+    def propose (self, value):
+        ''' propose a value to all acceptors'''
         # TODO: handle cases where value is too large (>2048)
         self.updateNum ()
-        self.retry_count = 3
         self.value = value
 
         # send prepare to all acceptors
@@ -185,23 +200,38 @@ class Purposer ():
             try:
                 self.send_prepare ()
                 if (self.recv_quorum () == 'promise'):
+                    print ('accept promise from acceptor')
                     break
+                else:
+                    if (self.propose_except () == 'retry'):
+                        self.close_all ()
+                        self.establish ()
+                        self.propose (self.value)
+                        return
+
             except socket.timeout:
-                if (self.purpose_except () == 'retry'):
-                    continue
+                if (self.propose_except () == 'retry'):
+                    self.close_all ()
+                    self.establish ()
+                    self.propose (self.value)
                 else:
                     return 'fail'
-            except:
-                print ('Unknown erro while preparing')
+            except Exception as e:
+                print e
+                print ('Unknown error while preparing')
                 exit ()
                 
         # accept
         try:
+            print ('sending accept')
             self.send_accept ()
         except:
             print ('Error sending accept')
             return 'fail'
                 
-        # purpose successful, clean up
-        print 'purpose successful'
+        # propose successful, clean up
+        print 'propose successful'
+        self.updateNum ()
+        self.retry_count = 3
+        self.close_all ()
         return 'success'

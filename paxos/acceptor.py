@@ -13,15 +13,12 @@ class Acceptor ():
         self.is_timedout = 0
 
         # set variable
-        self.ID = config.ID
-        self.purpose_num = -1
+        self.ID = config['ID']
+        self.propose_num = -1
         self.promise_ID = -1
-        self.quorum = config.quorum
-        self.purposer_fd = {} # mapping ID to socket fd
+        self.quorum = config['quorum']
+        self.proposer_fd = {} # mapping ID to socket fd
         self.value = ''
-
-        # create listener socket
-        self.listener = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
 
 
     def __del__ (self):
@@ -29,9 +26,9 @@ class Acceptor ():
 
         # delete socket
         self.listener.close ()
-        for i in purposer_fd:
-            if (purposer_fd[i] > 0):
-                purposer_fd[i].close ()
+        for i in self.proposer_fd:
+            if (self.proposer_fd[i] > 0):
+                self.proposer_fd[i].close ()
 
 
     def log (self):
@@ -43,19 +40,23 @@ class Acceptor ():
 
 
     def establish (self):
-        ''' establish bind and listen to the purposers '''
+        ''' establish bind and listen to the proposers '''
+        # create listener socket
+        self.listener = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+        print (self.listener)
+
         host = self.quorum[self.ID]['host']
         port = self.quorum[self.ID]['port']
 
         # bind and listen to socket
-        self.listener.bind ((address, port))
+        self.listener.bind ((host, port))
         self.listener.listen (10)
 
 
     def gen_msg (self, msg_type):
-        ''' generate return msg to purposer'''
+        ''' generate return msg to proposer'''
         # Msg type:
-        # 'promise': promise a purpose
+        # 'promise': promise a propose
         # 'NACK': I don't accept
         msg = {}
         msg['ID'] = self.ID
@@ -65,16 +66,21 @@ class Acceptor ():
 
 
     def parse_msg (self, msg):
-        ''' parse the msg from purposer '''
-        # if a prepare
+        ''' parse the msg from proposer '''
+        print ('parsing msg')
         try:
             msg = json.loads (msg)
         except:
             print 'Unknown msg'
             return 'unknown msg'
 
+        print ('accepting msg type %s' % msg['msg_type'])
+        print ('accepting propose number %d' % msg['propose_num'])
+        print ('self propose number %d' % self.propose_num)
+
+
         if (msg['msg_type'] == 'prepare'):
-            # if purpose number higher
+            # if propose number higher
             if (msg['propose_num'] > self.propose_num):
                 # prepare number 
                 self.propose_num = msg['propose_num']
@@ -89,17 +95,19 @@ class Acceptor ():
                 return 'accept'
 
 
-    def send (self, purposer_fd, msg_type):
-        ''' promise the purposer 
-        param: the purposer connection socket '''
+    def send (self, proposer_fd, msg_type):
+        ''' promise the proposer 
+        param: the proposer connection socket '''
         # prepare the promise msg
-        msg = gen_msg (msg_type)
+        msg = self.gen_msg (msg_type)
 
-        # send the promise to purposer
+        print msg
+
+        # send the promise to proposer
         try:
-            purposer_fd.send (msg)
+            proposer_fd.send (msg)
         except:
-            print 'Error sending promise msg'
+            print 'Error sending msg'
             pass
         
 
@@ -109,30 +117,45 @@ class Acceptor ():
             # keep accepting new requests
             try:
                 c, addr = self.listener.accept ()
-            except:
+                print ('accepting from address %s' % (addr [0]))
+            except Exception as p:
                 print 'Error while accepting. Exiting..'
+                print p
                 exit ()
 
             # recv from accepted requests
             try:
-                c.settimeout (4)
+#                c.settimeout (4)
                 msg = c.recv (2048)
-                msg = self.parse_msg (msg)
+                msg_type = self.parse_msg (msg)
 
-                if (msg == 'prepare'):
+                if (msg_type == 'promise'):
                     self.send (c, 'promise')
-                elif (msg == 'accept'):
-                    self.value = msg.value
-                    self.log ()
+                    print ('promised')
+
+                    msg = c.recv (2048)
+                    msg_type = self.parse_msg (msg)
+
+                    if (msg_type == 'accept'):
+                        msg = json.loads (msg)
+                        self.value = msg['value']
+                        print ('logging')
+                        self.log ()
+                        c.close ()
+                        continue
+
                 else: # a stale request
                     self.send (c, 'NACK')
+                    print ('NACK. Ignoring propose')
+                    c.close ()
                     continue
 
             except socket.timeout:
                 print 'Timeout reached recieving.'
                 continue
             
-            except:
+            except Exception as p:
                 print 'Unknown error when accepting connections'
+                print p
                 exit ()
     
