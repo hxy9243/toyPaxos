@@ -14,7 +14,8 @@ config['ID'] = 41001
 config['type'] = 'proposer'
 
 # quorum
-quorum = {1: {'host':'127.0.0.1', 'port':8001}}
+quorum = {1: {'host':'127.0.0.1', 'port':8001},
+          2: {'host':'127.0.0.1', 'port':8002}}
 
 config['quorum'] = quorum
 config['host'] = '127.0.0.1'

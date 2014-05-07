@@ -34,9 +34,22 @@ class Acceptor ():
 
     def log (self):
         ''' commit to log'''
-        # TODO: commit to log
+
+        # commit to log
+        print ('-' * 50)
+        print ('\nLogging new value:')
+        print (self.value)
+        print ('-' * 50)
+        print ('\n')
+
+        # commit to file
+        filename = 'log_' + str (self.ID)
+        fp = open (filename, 'a')
+        fp.write (self.value)
+        fp.write ('\n')
+        fp.close ()
+
         # clear self value
-        print self.value
         self.value = ''
 
 
@@ -44,7 +57,6 @@ class Acceptor ():
         ''' establish bind and listen to the proposers '''
         # create listener socket
         self.listener = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
-        print (self.listener)
 
         host = self.quorum[self.ID]['host']
         port = self.quorum[self.ID]['port']
@@ -68,17 +80,16 @@ class Acceptor ():
 
     def parse_msg (self, msg):
         ''' parse the msg from proposer '''
-        print ('parsing msg')
-        print msg
+
         try:
             msg = json.loads (msg)
         except:
-            print 'Unknown msg'
+            print ('[err] Unknown msg')
             return ('unknown msg', msg)
 
-        print ('accepting msg type %s' % msg['msg_type'])
-        print ('accepting propose number %d' % msg['propose_num'])
-        print ('self propose number %d' % self.propose_num)
+        print ('[log] accepting msg type %s' % msg['msg_type'])
+        print ('[log] accepting propose number %d' % msg['propose_num'])
+        print ('[log] self propose number %d' % self.propose_num)
 
         if (msg['msg_type'] == 'prepare'):
             # if propose number higher
@@ -102,13 +113,11 @@ class Acceptor ():
         # prepare the promise msg
         msg = self.gen_msg (msg_type)
 
-        print msg
-
         # send the promise to proposer
         try:
             proposer_fd.send (msg)
         except:
-            print 'Error sending msg'
+            print ('[err] Error sending msg')
             pass
         
 
@@ -118,17 +127,16 @@ class Acceptor ():
             # keep accepting new requests
             try:
                 c, addr = self.listener.accept ()
-                print c
-                print addr
-                print ('[log] accepting from address %s' % (addr[0]))
+
+                print ('[log] Accepting from address %s' % (addr[0]))
             except Exception as p:
-                print 'Error while accepting. Exiting..'
+                print ('[err] Error while accepting. Exiting..')
                 print p
                 exit ()
 
             # recv from accepted requests
             try:
-#                c.settimeout (4)
+
                 msg = c.recv (2048)
                 msg_type, msg = self.parse_msg (msg)
 
@@ -136,7 +144,7 @@ class Acceptor ():
                     # promise a propose
                     self.send (c, 'promise')
                     
-                    print ('[log] promised proposer ID %d' % msg['ID'])
+                    print ('[log] Promised proposer ID %d' % msg['ID'])
 
                     msg = c.recv (2048)
                     msg_type, msg = self.parse_msg (msg)
@@ -144,23 +152,22 @@ class Acceptor ():
                     if (msg_type == 'accept'):
 
                         self.value = msg['value']
-                        print ('logging')
                         self.log ()
                         c.close ()
                         continue
 
                 else: # a stale request
                     self.send (c, 'NACK')
-                    print ('NACK. Ignoring propose')
+                    print ('[log] NACK. Ignoring propose')
                     c.close ()
                     continue
 
             except socket.timeout:
-                print 'Timeout reached receiving.'
+                print ('[err] Timeout reached receiving.')
                 continue
             
             except Exception as p:
-                print 'Unknown error when accepting connections'
-                print p
+                print ('[err] Unknown error when accepting connections')
+                print (p)
                 exit ()
     

@@ -54,11 +54,11 @@ class Proposer ():
 
                 s.settimeout (30)
                 s.connect ((host, port))
-                print 'Connection to acceptors established.'
+                print ('[log] ID %d Connection to acceptors established.' % self.ID)
                 
         except Exception as e:
             print e
-            print ("Problem connecting to addresses")
+            print ("[err] Problem connecting to addresses")
             exit ()
 
 
@@ -66,6 +66,8 @@ class Proposer ():
         ''' Send msg to all the quorum'''
         try:
             for i in self.quorum:
+                print self.quorum[i]
+
                 s = self.acceptors_fd[i]
                 s.sendall (msg)
         # raise timeout Exception
@@ -73,7 +75,7 @@ class Proposer ():
             raise socket.timeout
         except Exception as e:
             print (e)
-            print 'Unknown error while sending'
+            print ('[err] Unknown error while sending')
             exit ()
 
 
@@ -90,10 +92,10 @@ class Proposer ():
 
         # raise timeout Exception
         except socket.timeout:
-            print '[err] recveiving quorum timed out'
+            print ('[err] recveiving quorum timed out')
             raise socket.timeout
         except:
-            print '[err] Unknown error while receiving'
+            print ('[err] Unknown error while receiving')
             exit ()
 
 
@@ -116,7 +118,7 @@ class Proposer ():
         Msg['propose_num'] = self.propose_num
         Msg['value'] = value
         m = json.dumps (Msg)
-        print m
+
         return m
 
 
@@ -127,15 +129,13 @@ class Proposer ():
 
         msg_list = []
 
-        print m_list
-
         try:
             for m in m_list:
                 msg_list.append (json.loads (m))
 
         except Exception as p:
-            print 'Error parsing received msg'
-            print p
+            print ('[err] Error parsing received msg')
+            print (p)
             return 'NACK'
         
 
@@ -151,13 +151,13 @@ class Proposer ():
 
         # send prepare signals to all acceptors
         try:
-            print ('sending prepare')
-            self.send_quorum (self.gen_msg ('prepare'))
+
+            self.send_quorum (self.gen_msg ('prepare') )
         except socket.timeout:
             # handle prepare failure
             raise socket.timeout
         except Exception as e:
-            print 'Unkown exception in preparing. Exiting..'
+            print ('[err] Unkown exception in preparing. Exiting..')
             print (e)
             exit ()
 
@@ -170,7 +170,7 @@ class Proposer ():
         except socket.timeout:
             raise socket.timeout
         except:
-            print 'Unknown exception in sending accepting. Exiting...'
+            print ('[err] Unknown exception in sending accepting. Exiting...')
             exit ()
         
 
@@ -179,9 +179,10 @@ class Proposer ():
 
         # update retry
         self.retry_count = self.retry_count - 1
-        print self.retry_count
+        print ('[log] Retrying for %d' % self.retry_count)
+
         if (self.retry_count <= 0):
-            print ('Proposer with ID: %d failed with propose num %d'
+            print ('[err] Proposer with ID: %d failed with propose num %d'
                    % (self.ID, self.propose_num))
             return 'fail'
 
@@ -207,7 +208,7 @@ class Proposer ():
             try:
                 self.send_prepare ()
                 if (self.recv_quorum () == 'promise'):
-                    print ('accept promise from acceptor')
+                    print ('[log] Accepted promise from acceptor')
                     break
                 else:
                     if (self.propose_except () == 'retry'):
@@ -217,23 +218,23 @@ class Proposer ():
                     return
 
             except socket.timeout:
-                print ('propose from ID %d timed out' % self.ID)
+                print ('[err] Propose from ID %d timed out' % self.ID)
                 return 'fail'
             except Exception as e:
                 print e
-                print ('Unknown error while preparing')
+                print ('[err] Unknown error while preparing')
                 exit ()
                 
         # accept
         try:
-            print ('sending accept')
+            print ('[log] Sending accept')
             self.send_accept ()
         except:
-            print ('Error sending accept')
+            print ('[err] Error sending accept')
             return 'fail'
                 
         # propose successful, clean up
-        print 'propose successful'
+        print ('[log] propose successful')
         self.updateNum ()
         self.retry_count = 10
         self.close_all ()
