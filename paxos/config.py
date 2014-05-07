@@ -14,7 +14,7 @@ class Config ():
 
         else:
             try:
-                f = open ('config', 'r')
+                f = open (filename, 'r')
                 self.config = json.load (f)
                 f.close ()
             except:
@@ -25,19 +25,19 @@ class Config ():
     def default (self):
         ''' generating default value for config'''
         config = {}
-        config['ID'] = 0
-        config['type'] = 'purposer'
+        config['proposers'] = [{'ID':0, 'propose_num': 1000}]
+
         # quorum
         quorum = [{'ID':1, 'host':'127.0.0.1', 'port':8001},
-                  {'ID':2, 'host':'127.0.0.1', 'port':8002},
-                  {'ID':3, 'host':'127.0.0.1', 'port':8003}]
+                  {'ID':2, 'host':'127.0.0.1', 'port':8002}]
+
         config['quorum'] = quorum
 
         self.config = config        
 
 
-    def dumps (self, filename):
+    def dump (self, config, filename):
         ''' generate config file'''
         f = open (filename, 'w')
-        json.dump (self.config, f)
+        json.dump (config, f, indent = 4)
         f.close ()

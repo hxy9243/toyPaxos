@@ -18,15 +18,10 @@ def main (argv):
             'INSERT INTO TABLE%s\nVALUE(A, B, C, D, E);\n' % argv[2],
             'DELETE FROM TABLE%s\nWHERE \'student_name\'==\'JohnDoe\';\n' %argv[2]]
 
-    s = ''
-    N = p.updateNum ()
-    while (s != 'quit'):
-        s = raw_input ()
-        
+
+    for c in cmds:
         p.establish ()
-        p.propose (s)
-        N = N + 32
-        p.updateNum (N)
+        p.propose (c)
 
 
 if (__name__ == "__main__"):

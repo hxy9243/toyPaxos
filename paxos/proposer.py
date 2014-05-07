@@ -16,7 +16,7 @@ class Proposer ():
         # set variable
         self.ID = config['ID']
         self.value = ''
-        self.propose_num = config['ID']
+        self.propose_num = config['propose_num']
         self.quorum = config['quorum']
         self.acceptors_fd = {} # mapping ID to socket fd
 
@@ -43,21 +43,21 @@ class Proposer ():
         # create socket
         for i in self.quorum:
             s = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
-            self.acceptors_fd[i] = s
+            self.acceptors_fd[i['ID']] = s
 
         # establish connection, connect to all acceptors
         try:
             for i in self.quorum:
-                host = self.quorum[i]['host']
-                port = self.quorum[i]['port']
-                s = self.acceptors_fd[i]
+                host = i['host']
+                port = i['port']
+                s = self.acceptors_fd[i['ID']]
 
-                s.settimeout (30)
+                s.settimeout (5)
                 s.connect ((host, port))
                 print ('[log] ID %d Connection to acceptors established.' % self.ID)
                 
         except Exception as e:
-            print e
+            print (e)
             print ("[err] Problem connecting to addresses")
             exit ()
 
@@ -66,10 +66,9 @@ class Proposer ():
         ''' Send msg to all the quorum'''
         try:
             for i in self.quorum:
-                print self.quorum[i]
-
-                s = self.acceptors_fd[i]
+                s = self.acceptors_fd[i['ID']]
                 s.sendall (msg)
+
         # raise timeout Exception
         except socket.timeout:
             raise socket.timeout
@@ -84,7 +83,7 @@ class Proposer ():
         msg_list = []
         try:
             for i in self.quorum:
-                s = self.acceptors_fd[i]
+                s = self.acceptors_fd[i['ID']]
                 msg_list.append (s.recv (2048))
 
             # parse all the recieved msg
@@ -99,11 +98,17 @@ class Proposer ():
             exit ()
 
 
-    def updateNum (self):
-
-        # to guarantee no collision between proposers,
+    def updateNum (self, Num = None):
+        ''' update the proposer number'''
+        # to guarantee no collision between proposers, add MAX allowed
+        # number of proposers
         # TODO: a more sophiscated way?
-        self.propose_num = self.propose_num + 32
+        if (Num == None):
+            self.propose_num = self.propose_num + 32
+        else:
+            self.propose_num = Num
+
+        return self.propose_num
 
 
     def gen_msg (self, msg_type, value = ''):
@@ -215,6 +220,7 @@ class Proposer ():
                         self.retry ()
                         self.close_all ()
 
+                    self.retry_count = 10
                     return
 
             except socket.timeout:

@@ -11,15 +11,14 @@ class Acceptor ():
         ''' init acceptor '''
         # set state
         self.is_timedout = 0
-
         # set variable
         self.ID = config['ID']
+        self.host = config['host']
+        self.port = config['port']
         self.propose_num = -1
         self.promise_ID = -1
-        self.quorum = config['quorum']
         self.proposer_fd = {} # mapping ID to socket fd
         self.value = ''
-        self.lock = 'unlock'
 
 
     def __del__ (self):
@@ -58,8 +57,8 @@ class Acceptor ():
         # create listener socket
         self.listener = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
 
-        host = self.quorum[self.ID]['host']
-        port = self.quorum[self.ID]['port']
+        host = self.host
+        port = self.port
 
         # bind and listen to socket
         self.listener.bind ((host, port))
@@ -127,7 +126,7 @@ class Acceptor ():
             # keep accepting new requests
             try:
                 c, addr = self.listener.accept ()
-
+                c.settimeout (5)
                 print ('[log] Accepting from address %s' % (addr[0]))
             except Exception as p:
                 print ('[err] Error while accepting. Exiting..')
@@ -136,27 +135,28 @@ class Acceptor ():
 
             # recv from accepted requests
             try:
-
                 msg = c.recv (2048)
                 msg_type, msg = self.parse_msg (msg)
 
+                # if promise is decided at parsing msg
                 if (msg_type == 'promise'):
                     # promise a propose
                     self.send (c, 'promise')
                     
                     print ('[log] Promised proposer ID %d' % msg['ID'])
-
+                    
+                    # receive again for accept 
                     msg = c.recv (2048)
                     msg_type, msg = self.parse_msg (msg)
 
                     if (msg_type == 'accept'):
-
                         self.value = msg['value']
                         self.log ()
                         c.close ()
                         continue
 
-                else: # a stale request
+                # if anything else, it's a stale request
+                else:
                     self.send (c, 'NACK')
                     print ('[log] NACK. Ignoring propose')
                     c.close ()
@@ -169,5 +169,6 @@ class Acceptor ():
             except Exception as p:
                 print ('[err] Unknown error when accepting connections')
                 print (p)
+                self.listener.close ()
                 exit ()
     
