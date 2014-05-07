@@ -36,6 +36,7 @@ class Acceptor ():
     def log (self):
         ''' commit to log'''
         # TODO: commit to log
+        # clear self value
 
 
     def establish (self):
@@ -53,27 +54,6 @@ class Acceptor ():
             exit ()
 
 
-    def accept (self):
-        ''' keep accepting incoming requests '''
-        while True:
-            # keep accepting new requests
-            try:
-                c, addr = self.listener.accept ()
-            except:
-                print 'Error while accepting. Exiting..'
-                exit ()
-
-            # recv from accepted requests
-            try:
-                c.settimeout (4)
-                msg = c.recv (2048)
-                parse_msg (msg)
-            except socket.timeout:
-                print 'Timeout reached recieving.'
-            except:
-                print 'Unknown error when accepting connections'
-                exit ()
-    
 
     def parse_msg (self, msg):
         ''' parse the msg from purposer '''
@@ -89,6 +69,7 @@ class Acceptor ():
                 # prepare number 
                 self.prepare_num = msg['propose_num']
                 # TODO: promise
+                # return type
             else:
                 # pass
                 pass
@@ -96,7 +77,7 @@ class Acceptor ():
         elif (msg['type'] == 'accept'):
             if (msg['propose_num'] == self.promise_ID):
                 # if an accept msg, commit val to log
-                self.log (val)
+                # return log
 
 
     def promise (self, purposer_fd):
@@ -112,3 +93,32 @@ class Acceptor ():
             print 'Error sending promise msg'
             pass
         
+
+    def accept (self):
+        ''' keep accepting incoming requests '''
+        while True:
+            # keep accepting new requests
+            try:
+                c, addr = self.listener.accept ()
+            except:
+                print 'Error while accepting. Exiting..'
+                exit ()
+
+            # recv from accepted requests
+            try:
+                c.settimeout (4)
+                msg = c.recv (2048)
+                if (parse_msg (msg) == 'prepare'):
+                    promise (c)
+                elif (parse_msg (msg) == 'accept'):
+                    self.value = msg.value
+                    self.log ()
+                else: # a stale request
+                    # ignore
+
+            except socket.timeout:
+                print 'Timeout reached recieving.'
+            except:
+                print 'Unknown error when accepting connections'
+                exit ()
+    

@@ -11,7 +11,7 @@ class Purposer ():
         ''' init purposer '''
         # set state
         
-        self.is_timedout = 3 # how many times receive timedout
+        self.retry_count = 3
         
         # set variable
         self.ID = config.ID
@@ -50,6 +50,7 @@ class Purposer ():
 
                 s.settimeout (5)
                 s.connect ((host, port))
+                print 'Connection to acceptors established.'
                 
         except:
             print ("Problem connecting to addresses")
@@ -76,10 +77,10 @@ class Purposer ():
         try:
             for i in self.quorum:
                 s = self.acceptors_fd[i]
-                msg_list.append ( s.recv (2048))
+                msg_list.append (s.recv (2048))
 
             # parse all the recieved msg
-            parse_msg (msg_list)
+            return self.parse_msg (msg_list)
 
         # raise timeout Exception
         except socket.timeout:
@@ -89,10 +90,14 @@ class Purposer ():
             exit ()
 
 
-    def parse_msg (self, msg_list):
-        ''' Parse incoming messages from acceptor
+    def parse_msg (self, m_list):
+        ''' Parse incoming messages from acceptor after prepare
             param: list of all msg '''
-        # TODO: parse msg 
+        msg_list = []
+
+        for m in msg_list:
+            msg_list.append (json.loads (m))
+        
         if (m['type'] == 'promise' for all m in msg_list):
             return 'promise'
 
@@ -101,84 +106,96 @@ class Purposer ():
 
     
     def updateNum (self):
+
+        # to guarantee no collision between purposers,
+        # TODO: a more sophiscated way?
         self.purpose_num = self.purpose_num + 32
 
 
     def gen_msg (self, msg_type, value = ''):
         ''' return the prepare message to send to acceptors '''
+        # Msg type:
+        # 'prepare': inform acceptors to prepare for a purpose
+        # 'accept': inform acceptors to accept for a purpose
+
         Msg = {}
         Msg['ID'] = self.ID
         Msg['msg_type'] = msg_type
+        Msg['prepare_num'] = self.prepare_num
         Msg['value'] = value
         return json.dumps (Msg)
 
 
     def send_prepare (self):
-        ''' purpose a value'''
-        # TODO: prepare the prepare msg
-        prepare_msg = self.gen_msg ('prepare')
+        ''' purpose for a purpose number'''
 
         # send prepare signals to all acceptors
         try:
-            self.send_quorum (prepare_msg)
+            self.send_quorum (self.gen_msg ('prepare'))
         except socket.timeout:
             # handle prepare failure
             raise socket.timeout
         except:
-            print 'Unkown exception in prepare signal. Exiting..'
+            print 'Unkown exception in preparing. Exiting..'
             exit ()
 
 
     def send_accept (self):
         ''' send the accept value to all acceptors '''
-        accept_msg = self.gen_msg ('accept', self.value)
 
         try:
-            self.send_quorum (accept_msg)
+            self.send_quorum (self.gen_msg ('accept', self.value))
+        except socket.timeout:
+            raise socket.timeout
         except:
-            # TODO: handle accept excepts
-            return 'Error'
-        
-        # update the purpose number
-        self.updateNum ()
-        return 'Success'
+            print 'Unknown exception in sending accepting. Exiting...'
+            exit ()
         
 
     def purpose_except (self):
         ''' An exception inside the purposer, try to handle it'''
-        # resend the purpose
+        self.updateNum ()
+
+        # update retry
         self.retry_count = self.retry_count - 1
         if (self.retry_count == 0):
             print ('Purposer with ID: %d failed with purpose num %d'
                    % (self.ID, self.purpose_num))
+            return 'fail'
 
-        self.updateNum ()
+        else:
+            return 'retry'
 
 
     def purpose (self, value):
         ''' purpose a value to all acceptors'''
+        # TODO: handle cases where value is too large (>2048)
+        self.updateNum ()
+        self.retry_count = 3
         self.value = value
 
         # send prepare to all acceptors
-        while (self.retry_count != 0):
+        while True:
             try:
                 self.send_prepare ()
-                break
+                if (self.recv_quorum () == 'promise'):
+                    break
             except socket.timeout:
-                self.purpose_except ()
+                if (self.purpose_except () == 'retry'):
+                    continue
+                else:
+                    return 'fail'
             except:
-                print 'Unknown error while preparing'
-                exit ()
-
-        # send accept msg to all acceptors
-        while (self.retry_count != 0):
-            try:
-                self.send_accept ()
-                break
-            except socket.timeout:
-                self.purpose_except ()
-            except:
-                print 'Unknown error while preparing'
+                print ('Unknown erro while preparing')
                 exit ()
                 
+        # accept
+        try:
+            self.send_accept ()
+        except:
+            print ('Error sending accept')
+            return 'fail'
+                
+        # purpose successful, clean up
         print 'purpose successful'
+        return 'success'
