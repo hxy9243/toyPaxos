@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 from gevent import socket
 import time
@@ -14,10 +14,11 @@ class Acceptor ():
 
         # set variable
         self.ID = config.ID
-        self.purpose_num = 0
-        self.promise_ID = 0
+        self.purpose_num = -1
+        self.promise_ID = -1
         self.quorum = config.quorum
         self.purposer_fd = {} # mapping ID to socket fd
+        self.value = ''
 
         # create listener socket
         self.listener = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
@@ -37,6 +38,8 @@ class Acceptor ():
         ''' commit to log'''
         # TODO: commit to log
         # clear self value
+        print self.value
+        self.value = ''
 
 
     def establish (self):
@@ -45,14 +48,20 @@ class Acceptor ():
         port = self.quorum[self.ID]['port']
 
         # bind and listen to socket
-        self.listener.settimeout (4)
-        try:
-            self.listener.bind ((address, port))
-            self.listener.listen (10)
-        except:
-            print 'Fail to listen to port, exiting..'
-            exit ()
+        self.listener.bind ((address, port))
+        self.listener.listen (10)
 
+
+    def gen_msg (self, msg_type):
+        ''' generate return msg to purposer'''
+        # Msg type:
+        # 'promise': promise a purpose
+        # 'NACK': I don't accept
+        msg = {}
+        msg['ID'] = self.ID
+        msg['msg_type'] = msg_type
+
+        return json.dumps (msg)
 
 
     def parse_msg (self, msg):
@@ -62,29 +71,29 @@ class Acceptor ():
             msg = json.loads (msg)
         except:
             print 'Unknown msg'
-            pass
+            return 'unknown msg'
 
-        if (msg['type'] == 'prepare'):
-            if (msg['propose_num'] > self.prepare_num):
+        if (msg['msg_type'] == 'prepare'):
+            # if purpose number higher
+            if (msg['propose_num'] > self.propose_num):
                 # prepare number 
-                self.prepare_num = msg['propose_num']
-                # TODO: promise
-                # return type
+                self.propose_num = msg['propose_num']
+                self.promise_ID = msg['ID']
+                return 'promise'
             else:
-                # pass
-                pass
+                return 'NACK'
 
-        elif (msg['type'] == 'accept'):
-            if (msg['propose_num'] == self.promise_ID):
-                # if an accept msg, commit val to log
-                # return log
+        elif (msg['msg_type'] == 'accept'):
+            if (msg['ID'] == self.promise_ID):
+                self.promise_ID = -1
+                return 'accept'
 
 
-    def promise (self, purposer_fd):
+    def send (self, purposer_fd, msg_type):
         ''' promise the purposer 
         param: the purposer connection socket '''
         # prepare the promise msg
-        msg = promise_msg ()
+        msg = gen_msg (msg_type)
 
         # send the promise to purposer
         try:
@@ -108,16 +117,21 @@ class Acceptor ():
             try:
                 c.settimeout (4)
                 msg = c.recv (2048)
-                if (parse_msg (msg) == 'prepare'):
-                    promise (c)
-                elif (parse_msg (msg) == 'accept'):
+                msg = self.parse_msg (msg)
+
+                if (msg == 'prepare'):
+                    self.send (c, 'promise')
+                elif (msg == 'accept'):
                     self.value = msg.value
                     self.log ()
                 else: # a stale request
-                    # ignore
+                    self.send (c, 'NACK')
+                    continue
 
             except socket.timeout:
                 print 'Timeout reached recieving.'
+                continue
+            
             except:
                 print 'Unknown error when accepting connections'
                 exit ()

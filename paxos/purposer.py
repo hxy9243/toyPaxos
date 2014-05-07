@@ -93,12 +93,18 @@ class Purposer ():
     def parse_msg (self, m_list):
         ''' Parse incoming messages from acceptor after prepare
             param: list of all msg '''
+        # TODO: handle exceptions as duplicate from acceptors
+
         msg_list = []
 
-        for m in msg_list:
-            msg_list.append (json.loads (m))
+        try:
+            for m in msg_list:
+                msg_list.append (json.loads (m))
+        except:
+            print 'Error parsing received msg'
+            return 'NACK'
         
-        if (m['type'] == 'promise' for all m in msg_list):
+        if (m['msg_type'] == 'promise' for all m in msg_list):
             return 'promise'
 
         else:
@@ -121,7 +127,7 @@ class Purposer ():
         Msg = {}
         Msg['ID'] = self.ID
         Msg['msg_type'] = msg_type
-        Msg['prepare_num'] = self.prepare_num
+        Msg['propuse_num'] = self.propuse_num
         Msg['value'] = value
         return json.dumps (Msg)
 
