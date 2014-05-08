@@ -1,0 +1,128 @@
+INSERT INTO FINAL_GRADE4 
+VALUE ('xhu9', 'A');
+
+INSERT INTO TABLE4
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE4
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO FINAL_GRADE3 
+VALUE ('xhu9', 'A');
+
+INSERT INTO TABLE3
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE3
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO FINAL_GRADE2 
+VALUE ('xhu9', 'A');
+
+INSERT INTO TABLE2
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE2
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO FINAL_GRADE22 
+VALUE ('xhu9', 'A');
+
+INSERT INTO TABLE28
+VALUE(A, B, C, D, E);
+
+INSERT INTO TABLE31
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE31
+WHERE 'student_name'=='JohnDoe';
+
+DELETE FROM TABLE28
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO TABLE22
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE22
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO TABLE16
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE16
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO TABLE6
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE6
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO TABLE10
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE10
+WHERE 'student_name'=='JohnDoe';
+
+DELETE FROM TABLE25
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO FINAL_GRADE6 
+VALUE ('xhu9', 'A');
+
+INSERT INTO FINAL_GRADE8 
+VALUE ('xhu9', 'A');
+
+INSERT INTO FINAL_GRADE5 
+VALUE ('xhu9', 'A');
+
+INSERT INTO TABLE8
+VALUE(A, B, C, D, E);
+
+INSERT INTO TABLE5
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE8
+WHERE 'student_name'=='JohnDoe';
+
+DELETE FROM TABLE5
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO FINAL_GRADE2 
+VALUE ('xhu9', 'A');
+
+INSERT INTO TABLE2
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE2
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO FINAL_GRADE1 
+VALUE ('xhu9', 'A');
+
+INSERT INTO TABLE1
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE1
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO FINAL_GRADE1 
+VALUE ('xhu9', 'A');
+
+INSERT INTO TABLE1
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE1
+WHERE 'student_name'=='JohnDoe';
+
+INSERT INTO FINAL_GRADE0 
+VALUE ('xhu9', 'A');
+
+INSERT INTO TABLE0
+VALUE(A, B, C, D, E);
+
+DELETE FROM TABLE0
+WHERE 'student_name'=='JohnDoe';
+
+hello
+goosalksdj

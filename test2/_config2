@@ -1,0 +1,546 @@
+[
+    {
+        "propose_num": 1000, 
+        "type": "proposer", 
+        "ID": 0, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1032, 
+        "type": "proposer", 
+        "ID": 1, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1064, 
+        "type": "proposer", 
+        "ID": 2, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1096, 
+        "type": "proposer", 
+        "ID": 3, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1128, 
+        "type": "proposer", 
+        "ID": 4, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1160, 
+        "type": "proposer", 
+        "ID": 5, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1192, 
+        "type": "proposer", 
+        "ID": 6, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1224, 
+        "type": "proposer", 
+        "ID": 7, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1256, 
+        "type": "proposer", 
+        "ID": 8, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1288, 
+        "type": "proposer", 
+        "ID": 9, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1320, 
+        "type": "proposer", 
+        "ID": 10, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1352, 
+        "type": "proposer", 
+        "ID": 11, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1384, 
+        "type": "proposer", 
+        "ID": 12, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1416, 
+        "type": "proposer", 
+        "ID": 13, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1448, 
+        "type": "proposer", 
+        "ID": 14, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1480, 
+        "type": "proposer", 
+        "ID": 15, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1512, 
+        "type": "proposer", 
+        "ID": 16, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1544, 
+        "type": "proposer", 
+        "ID": 17, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1576, 
+        "type": "proposer", 
+        "ID": 18, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1608, 
+        "type": "proposer", 
+        "ID": 19, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1640, 
+        "type": "proposer", 
+        "ID": 20, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1672, 
+        "type": "proposer", 
+        "ID": 21, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1704, 
+        "type": "proposer", 
+        "ID": 22, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1736, 
+        "type": "proposer", 
+        "ID": 23, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1768, 
+        "type": "proposer", 
+        "ID": 24, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1800, 
+        "type": "proposer", 
+        "ID": 25, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1832, 
+        "type": "proposer", 
+        "ID": 26, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1864, 
+        "type": "proposer", 
+        "ID": 27, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1896, 
+        "type": "proposer", 
+        "ID": 28, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1928, 
+        "type": "proposer", 
+        "ID": 29, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1960, 
+        "type": "proposer", 
+        "ID": 30, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }, 
+    {
+        "propose_num": 1992, 
+        "type": "proposer", 
+        "ID": 31, 
+        "quorum": [
+            {
+                "host": "127.0.0.1", 
+                "ID": 1, 
+                "port": 8001
+            }, 
+            {
+                "host": "127.0.0.1", 
+                "ID": 2, 
+                "port": 8002
+            }
+        ]
+    }
+]
